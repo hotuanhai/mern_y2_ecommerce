@@ -11,6 +11,7 @@ import TableComponent from '../TableComponent/TableComponent'
 import InputComponent from '../InputComponent/InputComponent'
 import * as ProductService from '../../service/ProductService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
+import { useQuery } from '@tanstack/react-query'
 
 const ProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); 
@@ -25,6 +26,7 @@ const ProfilePage = () => {
     type: '',
     countInStock: '',
   })
+  const [form] = Form.useForm()
   const mutation = useMutationHooks(
     (data) =>{
       const { name,
@@ -48,6 +50,55 @@ const ProfilePage = () => {
   )  
   const { data, isPending, isSuccess, isError } = mutation
   console.log('data product',data)
+  const getAllProducts = async () => {
+    const res = await ProductService.getAllProduct() 
+    return res
+  }
+  const {isLoading :isLoadingProducts, data: products} =  useQuery({
+    queryKey: ['products'], 
+    queryFn:getAllProducts
+  })
+  const renderAction = () => {
+    return(
+      <div>
+        <DeleteOutlined style={{color: 'red', fontSize: '30px', cursor: 'pointer'}}/>
+        <EditOutlined style={{color: 'orange', fontSize: '30px', cursor: 'pointer'}} 
+         // onClick={handleDetailsProduct}
+        />
+      </div>
+    )
+  }
+
+  const columns = [
+    {
+        title: 'Name',
+        dataIndex: 'name',
+        render: (text) => <a>{text}</a>,
+    },
+    {
+        title: 'Price',
+        dataIndex: 'price',
+    },
+    {
+        title: 'Rating',
+        dataIndex: 'rating',
+    },
+    {
+        title: 'Type',
+        dataIndex: 'type',
+    },
+    {
+        title: 'Action',
+        dataIndex: 'action',
+        render: renderAction,
+    },
+    
+  ];
+  const dataTable = products?.data?.length && products?.data?.map((product) => { 
+    return {...product, key: product._id}
+  })
+
+  console.log('product',products)
   useEffect(() => {
     if(isSuccess && data?.message === 'The name of product is already'){
       message.error()
@@ -72,7 +123,7 @@ const ProfilePage = () => {
       type: '',
       countInStock: '',
     })
-
+    form.resetFields()
   };
   const onFinish =() => {
     mutation.mutate(stateProduct)
@@ -108,7 +159,7 @@ const ProfilePage = () => {
         </Button>
       </div>
       <div style={{ marginTop: '20px'}}>
-         <TableComponent />
+         <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}/>
       </div>
       <Modal title="Tạo sản phẩm" open={isModalOpen} 
         onCancel={handleCancel} okButtonProps={{ hidden: true }} footer={null}
@@ -120,7 +171,7 @@ const ProfilePage = () => {
             wrapperCol={{ span: 18 }}
             onFinish={onFinish}
             autoComplete="off" 
-            //form={form}
+            form={form}
           >
             <Form.Item 
               label="Name"
