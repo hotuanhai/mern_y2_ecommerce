@@ -12,6 +12,7 @@ import InputComponent from '../InputComponent/InputComponent'
 import * as ProductService from '../../service/ProductService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import { useQuery } from '@tanstack/react-query'
+import DrawerComponent from '../DrawerComponent/DrawerComponent'
 
 const ProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); 
@@ -49,10 +50,15 @@ const ProfilePage = () => {
     }
   )  
   const { data, isPending, isSuccess, isError } = mutation
-  console.log('data product',data)
+  
   const getAllProducts = async () => {
     const res = await ProductService.getAllProduct() 
     return res
+  }
+  const handleDetailsProduct = () => { 
+    if(rowSelected){
+      //fetchGetDetailsProduct()
+    }
   }
   const {isLoading :isLoadingProducts, data: products} =  useQuery({
     queryKey: ['products'], 
@@ -63,7 +69,7 @@ const ProfilePage = () => {
       <div>
         <DeleteOutlined style={{color: 'red', fontSize: '30px', cursor: 'pointer'}}/>
         <EditOutlined style={{color: 'orange', fontSize: '30px', cursor: 'pointer'}} 
-         // onClick={handleDetailsProduct}
+          onClick={handleDetailsProduct}
         />
       </div>
     )
@@ -148,7 +154,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div style={{ width: '1270px', margin: '0 auto', height: '500px'}}>
+    <div >
       <WrapperHeader> Quản lý sản phẩm</WrapperHeader>
       <div style={{ marginTop: '10px'}}>
         <Button 
@@ -159,7 +165,15 @@ const ProfilePage = () => {
         </Button>
       </div>
       <div style={{ marginTop: '20px'}}>
-         <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}/>
+          <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}
+            onRow={(record,rowIndex) =>{
+              return {
+                onClick: event =>{
+                  setRowSelected(record._id)
+                }
+              };
+            }}
+          />
       </div>
       <Modal title="Tạo sản phẩm" open={isModalOpen} 
         onCancel={handleCancel} okButtonProps={{ hidden: true }} footer={null}
@@ -246,6 +260,11 @@ const ProfilePage = () => {
           </Form>
         </Loading>
       </Modal>
+      
+      <DrawerComponent title='Chi tiết sản phẩm' isOpen={isOpenDrawer} onClose={() => setIsOpenDrawer(false)}
+        width="90%"
+      >
+      </DrawerComponent>
 
 
       
