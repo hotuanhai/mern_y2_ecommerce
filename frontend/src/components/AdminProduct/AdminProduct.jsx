@@ -440,7 +440,7 @@ const ProfilePage = () => {
             }}
           />
       </div>
-      <ModalComponent title="Tạo sản phẩm" open={isModalOpen} 
+      <ModalComponent forceRender title="Tạo sản phẩm" open={isModalOpen} 
         onCancel={handleCancel} okButtonProps={{ hidden: true }} footer={null}
       >
         <Loading isPending={isPending}>

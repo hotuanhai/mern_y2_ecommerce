@@ -25,7 +25,7 @@ export function App() {
   }, []);
 
   const handleDecoded = () => {
-    console.log('locla',localStorage)
+    //console.log('locla',localStorage)
     let storageData = localStorage.getItem('access_token');
     let decoded = {};
     if (storageData && isJsonString(storageData)) {
