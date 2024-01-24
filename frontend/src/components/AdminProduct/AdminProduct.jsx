@@ -92,12 +92,33 @@ const ProfilePage = () => {
       return res
     }
   )
+  const mutationDeletedMany= useMutationHooks ( 
+    (data) => {
+      const { token, ...ids
+      } = data
+      const res = ProductService.deleteManyProduct(
+        ids, 
+        token)
+      return res
+    }
+  )
+  console.log('mutationDeletedMany',mutationDeletedMany)
+
+  const handleDeleteManyProducts = (ids) =>{
+    mutationDeletedMany.mutate({ids:ids, token: user?.access_token},{
+      onSettled: () =>{
+        queryProduct.refetch()
+      }
+    })
+  }
 
   const { data, isPending, isSuccess, isError } = mutation
   const { data: dataUpdated, isPending: isLoadingUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated } 
   = mutationUpdate
   const { data: dataDeleted, isPending: isLoadingDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted } 
   = mutationDeleted
+  const { data: dataDeletedMany, isPending: isLoadingDeletedMany, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany} 
+  = mutationDeletedMany
   
   const getAllProducts = async () => {
     const res = await ProductService.getAllProduct() 
@@ -296,7 +317,7 @@ const ProfilePage = () => {
     return {...product, key: product._id}
   })
 
-  console.log('product',products)
+  //console.log('product',products)
   useEffect(() => {
     if (isSuccessDeleted && dataDeleted?.status === 'OK'){
        message.success() 
@@ -306,6 +327,15 @@ const ProfilePage = () => {
       message.error()
     }
   }, [isSuccessDeleted,isErrorDeleted,dataDeleted])
+
+  useEffect(() => {
+    if (isSuccessDeletedMany && dataDeletedMany?.status === 'OK'){
+       message.success() 
+    }
+    else if (isErrorDeletedMany) { 
+      message.error()
+    }
+  }, [isSuccessDeletedMany,isErrorDeletedMany,dataDeletedMany])
 
   useEffect(() => {
     if(isSuccess && data?.message === 'The name of product is already'){
@@ -319,6 +349,7 @@ const ProfilePage = () => {
       message.error()
     }
   }, [isSuccess,isError,data])
+
   const handleCloseDrawer = () => { 
     setIsOpenDrawer(false);
     setStateProductDetails({
@@ -396,7 +427,7 @@ const ProfilePage = () => {
       ...stateProduct,
       image: file.preview
     })
-    console.log('aaaa',stateProduct)
+    //console.log('aaaa',stateProduct)
   }
   const handleOnchangeAvatarDetails= async ({fileList}) =>{
     const fileArray = Array.from(fileList);
@@ -431,6 +462,7 @@ const ProfilePage = () => {
       </div>
       <div style={{ marginTop: '20px'}}>
           <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}
+            handleDeleteMany={handleDeleteManyProducts}
             onRow={(record,rowIndex) =>{
               return {
                 onClick: event =>{
