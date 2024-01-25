@@ -129,6 +129,7 @@ const getAllProduct = (limit, page, sort, filter) => {
                 const allObjectFilter = await Product.find({
                     [label] : {'$regex':filter[1]}
                 }).limit(limit).skip(page * limit)
+                console.log('all',allObjectFilter)
                 resolve({
                     status: 'OK',
                     message: 'Success', 
