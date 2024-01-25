@@ -102,7 +102,7 @@ const ProfilePage = () => {
       return res
     }
   )
-  console.log('mutationDeletedMany',mutationDeletedMany)
+  //console.log('mutationDeletedMany',mutationDeletedMany)
 
   const handleDeleteManyProducts = (ids) =>{
     mutationDeletedMany.mutate({ids:ids, token: user?.access_token},{
@@ -121,7 +121,8 @@ const ProfilePage = () => {
   = mutationDeletedMany
   
   const getAllProducts = async () => {
-    const res = await ProductService.getAllProduct() 
+    const res = await ProductService.getAllProduct()
+    console.log('res',res) 
     return res
   }
   const fetchGetDetailsProduct = async () => {
