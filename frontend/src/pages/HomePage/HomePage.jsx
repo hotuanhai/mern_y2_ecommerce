@@ -15,12 +15,18 @@ const HomePage = () => {
   const searchProduct =  useSelector((state)=> state?.product?.search)
   const refSearch = useRef()
   const searchDebounce =useDebounce(searchProduct,1000)
+  const [limit,setLimit] = useState(6)
   const[ stateProducts,setStateProducts] = useState([])
   const arr = ['TV','Tủ lạnh','Laptop']
-  const fetchProductAll = async (search) => {
-    const res = await ProductService.getAllProduct(search) 
+  const fetchProductAll = async (search, limit) => {
+    // console.log('search:', search);
+    // console.log('limit:', limit);
+    // const search =''
+    // const limit = context?.queryKey && context?.queryKey[1]
+    const res = await ProductService.getAllProduct(search,limit) 
     if(search.length > 0 || refSearch.current){
       setStateProducts(res?.data)
+      return res
     }
     else{
       return res
@@ -29,23 +35,29 @@ const HomePage = () => {
   useEffect(() => {
     if(refSearch.current) { 
       //console.log('chaychay') 
-      fetchProductAll(searchDebounce)
+      fetchProductAll(searchDebounce,limit)
     }
     refSearch.current = true
-  },[searchDebounce])
+  },[searchDebounce,limit])
 
-  const {isLoading, data: products} =  useQuery({ queryKey: 'product', queryFn: fetchProductAll })
+  const { isLoading, data: products,isStale } = useQuery({
+    queryKey: ['products',limit], // Include limit in the query key
+    queryFn: () => fetchProductAll(searchDebounce,limit), // Pass query function
+    keepPreviousData: true
+  });
+  //console.log('p',products)
+  //prev query version
+  //const {isLoading, data: products} =  useQuery({ queryKey: 'product',limit, queryFn: fetchProductAll })
   //useQuery(['products'], fetchProductAll)
   //  
   //console.log('dataque', useQuery)
   //console.log('data', product)
-  useEffect(() =>{
-    if(products?.data?.length > 0){
-      setStateProducts(products?.data)
-    }
-  }, [products])
+  // useEffect(() =>{
+  //   if(products?.data?.length > 0){
+  //     setStateProducts(products?.data)
+  //   }
+  // }, [products])
   return (
-    
     <>
       <div style={{width:'1270px', margin:'0 auto'}}>
         <WrapperTypeProduct>
@@ -78,17 +90,25 @@ const HomePage = () => {
             })}
           </WrapperProducts>        
           <div style={{width:'100%',display:'flex',justifyContent:'center',marginTop:'10px'}}>
-            <WrapperButtonMore textButton="Xem thêm" type="outline" 
-              styleButton={{ border: '1px solid rgb(11, 116, 229)', color: 'rgb(11, 116, 229)', 
-                          width: '240px', height: '38px', borderRadius: '4px'
+            <WrapperButtonMore 
+              disabled={products?.total===stateProducts?.length || isLoading || products?.totalPage===1}
+              textButton="Xem thêm" type="outline" 
+              styleButton={{ 
+                border: '1px solid rgb(11, 116, 229)', 
+                color: `${(products?.total === stateProducts?.length || isLoading || products?.totalPage===1) ? '#ccc' : 'rgb(11, 116, 229)'}`,
+                width: '240px', height: '38px', borderRadius: '4px'
               }} 
-              styleTextButton={{fontWeight: 500}}/>
+              styleTextButton={{
+                fontWeight: 500,
+                color: (products?.total === stateProducts?.length || isLoading || products?.totalPage===1) && '#fff'
+              }}
+              onClick ={() => setLimit((prev) => prev + 6)}
+              
+            />
           </div>
         </div>
       </div>
-    </>
-    
-    
+    </> 
   )
 }
 
