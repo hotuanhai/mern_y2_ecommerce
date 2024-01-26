@@ -1,16 +1,45 @@
-import React from 'react'
-import imageProduct from '../../assets/images/test.webp' 
+import React, { useState } from 'react'
 import imageProductSmall from '../../assets/images/imagesmall.webp'
-import { Col, Image, Row } from 'antd'
-import {StarFilled,MinusOutlined,PlusOutlined} from '@ant-design/icons';
+import { Col, Image, Row,Rate } from 'antd'
+import {MinusOutlined,PlusOutlined} from '@ant-design/icons';
 import ButtonComponent from '../ButtonComponent/ButtonComponent'
-import { WrapperAddressProduct, WrapperInputNumber, WrapperPriceProduct, WrapperPriceTextProduct, WrapperQualityProduct, WrapperStyleColImage, WrapperStyleImageSmall, WrapperStyleNameProduct, WrapperStyleTextSell } from './style'
-const ProductDetailsComponent = () => {
-    const onChange = () => {}
+import { WrapperAddressProduct, WrapperInputNumber, WrapperPriceProduct, 
+    WrapperPriceTextProduct, WrapperQualityProduct, WrapperStyleColImage, 
+    WrapperStyleImageSmall, WrapperStyleNameProduct, WrapperStyleTextSell } from './style'
+import * as ProductService from '../../service/ProductService'
+import { useQuery } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
+const ProductDetailsComponent = ({idProduct}) => {
+    const[numProduct,setNumProduct] = useState()
+    const user = useSelector((state) => state.user)
+    const onChange = (value) => {
+        setNumProduct(Number(value))
+    }
+    const handleChangeCount=(type) =>{
+        if(type === 'increase'){
+            setNumProduct((prev)=> prev+1)
+        }else{
+            setNumProduct((prev)=> prev-1)
+        }
+    }
+
+    const fetchGetDetailsProduct = async (id) => {       
+        if (id) { 
+            const res = await ProductService.getDetailsProduct(id) 
+            return res.data
+        }
+    }
+    const {  data: productDetails } = useQuery({
+        queryKey: ['product-details',idProduct], // Include limit in the query key
+        queryFn: () => fetchGetDetailsProduct(idProduct), // Pass query function
+        enabled: !! idProduct
+    });
+    console.log('productt det',productDetails)
+    
   return (
     <Row style={{padding:'16px',background:'#fff',borderRadius:'4px'}}>
         <Col span={10} style={{ borderRight: '1px solid #e5e5e5',paddingRight:'8px'}}>
-            <Image src={imageProduct} alt="image product" preview="false" /> 
+            <Image src={productDetails?.image} alt="image product" preview="false" /> 
             <Row style={{paddingTop:'10px',justifyContent:'space-between'}}>
                 <WrapperStyleColImage span={4}>
                     <WrapperStyleImageSmall src={imageProductSmall} alt="image small" preview="false" /> 
@@ -30,19 +59,17 @@ const ProductDetailsComponent = () => {
             </Row>
         </Col>
         <Col span={14} style={{paddingLeft: '10px'}}>
-            <WrapperStyleNameProduct>Sách - Berserk Deluxe Volume 5 by Kentaro Miura </WrapperStyleNameProduct>
+            <WrapperStyleNameProduct>{productDetails?.name}</WrapperStyleNameProduct>
             <div>
-                <StarFilled style={{ fontSize: '12px', color:'rgb(253, 216, 54)' }} />
-                <StarFilled style={{ fontSize: '12px', color:'rgb(253, 216, 54)' }} />
-                <StarFilled style={{ fontSize: '12px', color:'rgb(253, 216, 54)' }} />
+                <Rate allowHalf defaultValue={productDetails?.rating} value={productDetails?.rating} />
                 <WrapperStyleTextSell>| Đã bán 1000+</WrapperStyleTextSell>
             </div>
             <WrapperPriceProduct>
-                <WrapperPriceTextProduct>200.000</WrapperPriceTextProduct>
+                <WrapperPriceTextProduct>{productDetails?.price}</WrapperPriceTextProduct>
             </WrapperPriceProduct>
             <WrapperAddressProduct>
                 <span>Giao đến </span>
-                <span className='address'>Q. 1, P. Bến Nghé, Hồ Chí Minh</span>
+                <span className='address'>{user?.address}</span>
                 <span className='change-address'> - Đổi địa chỉ</span>
             </WrapperAddressProduct>
             <div style={{ margin: '10px 0 20px', padding: '10px 0', borderTop: '1px solid #e5e5e5', borderBottom: '1px solid #e5e5e5' }}> 
@@ -50,11 +77,15 @@ const ProductDetailsComponent = () => {
                         Số lượng
                 </div>
                 <WrapperQualityProduct>
-                    <button style={{ border: 'none', background: 'transparent' }}> 
+                    <button style={{ border: 'none', background: 'transparent' ,cursor:'pointer'}}
+                        onClick={() => handleChangeCount('decrease')}
+                    > 
                         <MinusOutlined style={{ color: '#000', fontSize: '20px' }} />
                     </button>
-                    <WrapperInputNumber defaultValue={3} onChange={onChange} size="small" /> 
-                    <button style={{ border: 'none', background: 'transparent' }}> 
+                    <WrapperInputNumber onChange={onChange} defaultValue={0} value={numProduct} size="small" /> 
+                    <button style={{ border: 'none', background: 'transparent' ,cursor:'pointer'}} 
+                        onClick={() => handleChangeCount('increase')}
+                    > 
                         <PlusOutlined style={{ color: '#000', fontSize: '20px' }} />
                     </button> 
                 </WrapperQualityProduct>

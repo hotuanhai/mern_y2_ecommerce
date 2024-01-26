@@ -57,6 +57,7 @@ const HomePage = () => {
   //     setStateProducts(products?.data)
   //   }
   // }, [products])
+ // console.log('product',products,products?.total,stateProducts?.length, isLoading, products?.totalPage)
   return (
     <>
       <div style={{width:'1270px', margin:'0 auto'}}>
@@ -85,6 +86,7 @@ const HomePage = () => {
                   type={product.type}
                   selled={product.selled}
                   discount={product.discount}
+                  id={product._id}
                 />
               )
             })}
