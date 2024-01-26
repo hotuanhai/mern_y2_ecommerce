@@ -17,12 +17,9 @@ const HomePage = () => {
   const searchDebounce =useDebounce(searchProduct,1000)
   const [limit,setLimit] = useState(6)
   const[ stateProducts,setStateProducts] = useState([])
-  const arr = ['TV','Tủ lạnh','Laptop']
+  const [typeProducts,setTypeProducts] = useState([])
+
   const fetchProductAll = async (search, limit) => {
-    // console.log('search:', search);
-    // console.log('limit:', limit);
-    // const search =''
-    // const limit = context?.queryKey && context?.queryKey[1]
     const res = await ProductService.getAllProduct(search,limit) 
     if(search.length > 0 || refSearch.current){
       setStateProducts(res?.data)
@@ -32,6 +29,17 @@ const HomePage = () => {
       return res
     }    
   }
+  const fetchAllTypeProduct = async() => { 
+    const res = await ProductService.getAllTypeProduct() 
+    if(res?.status === 'OK'){
+      setTypeProducts(res?.data)
+    } 
+    return res
+  }
+  useEffect(() =>{
+    fetchAllTypeProduct()
+  },[])
+
   useEffect(() => {
     if(refSearch.current) { 
       //console.log('chaychay') 
@@ -62,7 +70,7 @@ const HomePage = () => {
     <>
       <div style={{width:'1270px', margin:'0 auto'}}>
         <WrapperTypeProduct>
-          {arr.map((item) =>{
+          {typeProducts.map((item) =>{
             return(
               <TypeProduct name={item} key={item}/>
             ) 

@@ -4,8 +4,8 @@ import Loading from '../../components/LoadingComponent/Loading'
 import * as message from '../../components/Message/Message'
 import { useDispatch, useSelector } from 'react-redux'
 import {  SearchOutlined} from '@ant-design/icons';
-import { getBase64 } from '../../utils'
-import { Button, Form, Modal, Space } from 'antd'
+import { getBase64, renderOptions } from '../../utils'
+import { Button, Form, Modal, Select, Space } from 'antd'
 import {PlusOutlined,DeleteOutlined,EditOutlined} from '@ant-design/icons'
 import TableComponent from '../TableComponent/TableComponent'
 import InputComponent from '../InputComponent/InputComponent'
@@ -26,6 +26,8 @@ const ProfilePage = () => {
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
+  //choose option
+  const [typeSelect,setTypeSelect] = useState('');
 
   const [stateProduct, setStateProduct] = useState({
     name: '',
@@ -35,6 +37,7 @@ const ProfilePage = () => {
     image: '',
     type: '',
     countInStock: '',
+    newType: ''
   })
   const [stateProductDetails, setStateProductDetails] = useState({
     name: '',
@@ -111,6 +114,11 @@ const ProfilePage = () => {
       }
     })
   }
+  
+  const fetchAllTypeProduct = async() => { 
+    const res = await ProductService.getAllTypeProduct()
+    return res
+  }
 
   const { data, isPending, isSuccess, isError } = mutation
   const { data: dataUpdated, isPending: isLoadingUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated } 
@@ -157,6 +165,8 @@ const ProfilePage = () => {
     setIsOpenDrawer(true)
   }
   const queryProduct =  useQuery({queryKey: ['products'], queryFn:getAllProducts  })
+  const typeProduct =  useQuery({queryKey: ['type-product'], queryFn:fetchAllTypeProduct  })
+  console.log('type', typeProduct)
   const {isLoading :isLoadingProducts, data: products} = queryProduct
   const renderAction = () => {
     return(
@@ -391,6 +401,7 @@ const ProfilePage = () => {
   const handleCancelDelete = () =>{
     setIsModalOpenDelete(false)
   }
+
   const handleDeleteProduct = () =>{
     mutationDeleted.mutate({id: rowSelected, toke: user?.access_token},{
       onSettled: () =>{
@@ -400,7 +411,16 @@ const ProfilePage = () => {
   }
 
   const onFinish =() => {
-    mutation.mutate(stateProduct,{
+    const params = {
+      name: stateProduct.name,
+      price: stateProduct.price,
+      description: stateProduct.description,
+      rating: stateProduct.rating,
+      image: stateProduct.image,
+      type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
+      countInStock: stateProduct.countInStock,
+    }
+    mutation.mutate(params,{
       onSettled: () =>{
         queryProduct.refetch()
       }
@@ -450,6 +470,13 @@ const ProfilePage = () => {
     })
   }
 
+  const handleChangeSelect =(value) =>{    
+      setStateProduct({
+        ...stateProduct,
+        type: value
+      })
+  }
+  console.log('val type',stateProduct)
   return (
     <div >
       <WrapperHeader> Quản lý sản phẩm</WrapperHeader>
@@ -496,9 +523,24 @@ const ProfilePage = () => {
               label="Type"
               name="type"
               rules={[{ required: true, message: 'Please input your type!' }]}
+              >         
+              <Select
+                name="type"
+                value={stateProduct.type}
+                onChange={handleChangeSelect}
+                options={renderOptions(typeProduct?.data?.data)}
+              />
+            </Form.Item>  
+            {stateProduct.type === 'add_type' &&(
+              <Form.Item
+                label="New type"
+                name="newType"
+                rules={[{ required: true, message: 'Please input your type!' }]}
               >
-              <InputComponent value={stateProduct.type} onChange={handleOnchange} name="type"/>
-            </Form.Item>   
+                  <InputComponent value={stateProduct.newType} onChange={handleOnchange} name="newType"/>               
+              </Form.Item> 
+            )}
+
             <Form.Item
               label="count inStock"
               name="countInStock"
@@ -583,7 +625,7 @@ const ProfilePage = () => {
               name="type"
               rules={[{ required: true, message: 'Please input your type!' }]}
               >
-              <InputComponent value={stateProductDetails.type} onChange={handleOnchangeDetails} name="type"/>
+              <InputComponent value={stateProductDetails.type} onChange={handleOnchangeDetails} name="type"/>           
             </Form.Item>   
             <Form.Item
               label="count inStock"
