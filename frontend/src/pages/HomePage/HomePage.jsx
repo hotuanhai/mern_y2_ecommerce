@@ -14,7 +14,7 @@ import { useDebounce } from '../../hooks/useDebounce'
 const HomePage = () => {
   const searchProduct =  useSelector((state)=> state?.product?.search)
   const refSearch = useRef()
-  const searchDebounce =useDebounce(searchProduct,1000)
+  const searchDebounce =useDebounce(searchProduct,500)
   const [limit,setLimit] = useState(6)
   const[ stateProducts,setStateProducts] = useState([])
   const [typeProducts,setTypeProducts] = useState([])
