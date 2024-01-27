@@ -8,13 +8,19 @@ import { WrapperAddressProduct, WrapperInputNumber, WrapperPriceProduct,
     WrapperStyleImageSmall, WrapperStyleNameProduct, WrapperStyleTextSell } from './style'
 import * as ProductService from '../../service/ProductService'
 import { useQuery } from '@tanstack/react-query';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { addOrderProduct } from '../../redux/slides/orderSlide';
 const ProductDetailsComponent = ({idProduct}) => {
-    const[numProduct,setNumProduct] = useState()
+    const[numProduct,setNumProduct] = useState(1)
+    const navigate = useNavigate()
+    const location = useLocation()
+    const dispatch = useDispatch()
     const user = useSelector((state) => state.user)
     const onChange = (value) => {
         setNumProduct(Number(value))
     }
+
     const handleChangeCount=(type) =>{
         if(type === 'increase'){
             setNumProduct((prev)=> prev+1)
@@ -34,7 +40,23 @@ const ProductDetailsComponent = ({idProduct}) => {
         queryFn: () => fetchGetDetailsProduct(idProduct), // Pass query function
         enabled: !! idProduct
     });
-    console.log('productt det',productDetails)
+    console.log('productt det',productDetails,user)
+    const handleAddOrderProduct = () =>{
+        if(!user?.id){
+            navigate('/sign-in', {state: location?.pathname})
+        }
+        else{
+            dispatch(addOrderProduct({
+                orderItem: {
+                    name: productDetails?.name, 
+                    amount: numProduct,
+                    image: productDetails?.image, 
+                    price: productDetails?.price, 
+                    product: productDetails?._id
+                }
+            }))
+        }
+    }
     
   return (
     <Row style={{padding:'16px',background:'#fff',borderRadius:'4px'}}>
@@ -101,6 +123,7 @@ const ProductDetailsComponent = ({idProduct}) => {
                         border: 'none',
                         borderRadius: '4px'
                     }}         
+                    onClick={handleAddOrderProduct}
                     textButton={ 'Chọn mua'}
                     styleTextButton={{ color: '#fff',fontSize:'15px',fontWeight:'700' }}>
                 </ButtonComponent>
