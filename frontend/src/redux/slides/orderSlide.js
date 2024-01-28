@@ -42,10 +42,16 @@ export const orderSlide = createSlice({
         },
         removeOrderProduct: (state, action) => {
             const {idProduct} = action.payload
-            const itemOrder = state?.orderItems?.find((item) => item?.product !== idProduct) 
-            itemOrder.orderItems = itemOrder
-        },      
+            const itemOrder = state?.orderItems?.filter((item) => item?.product !== idProduct) 
+            state.orderItems = itemOrder
+        },  
+        removeAllOrderProduct: (state, action) => {        
+            const {listChecked} = action.payload
+            const itemOrders = state?.orderItems?.filter((item) => !listChecked.includes(item.product) ) 
+            state.orderItems = itemOrders   
+        },
     },
 })
-export const { addOrderProduct } = orderSlide.actions
+export const { addOrderProduct ,increaseAmount,decreaseAmount,removeOrderProduct,
+    removeAllOrderProduct} = orderSlide.actions
 export default orderSlide.reducer
