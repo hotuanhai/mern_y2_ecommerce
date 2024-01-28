@@ -37,7 +37,8 @@ const ProfilePage = () => {
     image: '',
     type: '',
     countInStock: '',
-    newType: ''
+    newType: '',
+    discount: '',
   })
   const [stateProductDetails, setStateProductDetails] = useState({
     name: '',
@@ -47,6 +48,7 @@ const ProfilePage = () => {
     image: '',
     type: '',
     countInStock: '',
+    discount: '',
   })
 
   const [form] = Form.useForm()
@@ -58,7 +60,8 @@ const ProfilePage = () => {
       rating,
       image,
       type,
-      countInStock } = data 
+      countInStock,
+      discount } = data 
     const res = ProductService.createProduct({
       name, 
       price,
@@ -66,7 +69,8 @@ const ProfilePage = () => {
       rating,
       image,
       type,
-      countInStock
+      countInStock,
+      discount
     })
     return res
     }
@@ -143,7 +147,8 @@ const ProfilePage = () => {
         rating: res?.data?.rating,
         image: res?.data?.image,
         type: res?.data?.type,
-        countInStock: res?.data?.countInStock
+        countInStock: res?.data?.countInStock,
+        discount: res?.data?.discount
       })
     }
     setIsLoadingUpdate(false)
@@ -248,20 +253,6 @@ const ProfilePage = () => {
         setTimeout(() => searchInput.current?.select(), 100);
       }
     },
-    // render: (text) =>
-    //   searchedColumn === dataIndex ? (
-    //     // <Highlighter
-    //     //   highlightStyle={{
-    //     //     backgroundColor: '#ffc069',
-    //     //     padding: 0,
-    //     //   }}
-    //     //   searchWords={[searchText]}
-    //     //   autoEscape
-    //     //   textToHighlight={text ? text.toString() : ''}
-    //     // />
-    //   ) : (
-    //     text
-    //   ),
   });
   //col
   const columns = [
@@ -394,6 +385,7 @@ const ProfilePage = () => {
       image: '',
       type: '',
       countInStock: '',
+      discount: '',
     })
     form.resetFields()
   };
@@ -419,6 +411,7 @@ const ProfilePage = () => {
       image: stateProduct.image,
       type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
       countInStock: stateProduct.countInStock,
+      discount: stateProduct.discount,
     }
     mutation.mutate(params,{
       onSettled: () =>{
@@ -570,6 +563,13 @@ const ProfilePage = () => {
               <InputComponent value={stateProduct.rating} onChange={handleOnchange} name="rating"/>
             </Form.Item>
             <Form.Item
+              label="Discount"
+              name="discount"
+              rules={[{ required: true, message: 'Please input your discount!' }]}
+              >
+              <InputComponent value={stateProduct.discount} onChange={handleOnchange} name="discount"/>
+            </Form.Item>
+            <Form.Item
               label="Image"
               name="image"
               rules={[{ required: true, message: 'Please input your image!' }]}
@@ -654,6 +654,13 @@ const ProfilePage = () => {
               rules={[{ required: true, message: 'Please input your rating!' }]}
               >
               <InputComponent value={stateProductDetails.rating} onChange={handleOnchangeDetails} name="rating"/>
+            </Form.Item>
+            <Form.Item
+              label="Discount"
+              name="discount"
+              rules={[{ required: true, message: 'Please input your discount!' }]}
+              >
+              <InputComponent value={stateProductDetails.discount} onChange={handleOnchangeDetails} name="discount"/>
             </Form.Item>
             <Form.Item
               label="Image"
