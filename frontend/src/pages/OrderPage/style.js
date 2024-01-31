@@ -1,4 +1,4 @@
-import { Checkbox, InputNumber } from "antd";
+import { Checkbox, InputNumber, Upload } from "antd";
 import styled  from "styled-components";
 
 export const WrapperStyleHeader = styled.div`
@@ -101,3 +101,4 @@ export const WrapperInputNumber = styled (InputNumber)`
         }
     };
 `
+
